@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team On-Call Roster</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Team On-Call Roster</h1>
+        <p class="text-center text-sm text-gray-600 mb-4">All shift timings are in Indian Standard Time (IST)</p>
+
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+            <button id="prevWeekBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
+                &larr; Previous Week
+            </button>
+            <h2 id="weekRange" class="text-xl font-semibold text-gray-700 text-center flex-grow mx-4"></h2>
+            <button id="nextWeekBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
+                Next Week &rarr;
+            </button>
+        </div>
+        <div class="flex justify-center mb-6 space-x-4">
+            <button id="adminLoginBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Admin Login
+            </button>
+            <button id="recordReplacementBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105" disabled>
+                Record Replacement
+            </button>
+        </div>
+
+        <div class="overflow-x-auto mb-8">
+            <table id="rosterTable" class="min-w-full bg-white rounded-lg roster-table">
+                <thead>
+                    <tr>
+                        <th class="rounded-tl-lg">Day</th>
+                        <th>Date</th>
+                        <th>Morning <br>(6:30 am - 2:30 pm)</th>
+                        <th>Afternoon <br>(2:30 pm - 10:30 pm)</th>
+                        <th>Night <br>(10:30 pm - 6:30 am)</th>
+                        <th class="rounded-tr-lg">Off-Call</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Roster rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Replacement Records Section -->
+        <div id="replacementRecordsContainer" class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Replacement History</h3>
+            <div id="noRecordsMessage" class="text-center text-gray-500 italic">No replacement records yet.</div>
+            <!-- Replacement cards will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-button" id="closeLoginModalBtn">&times;</button>
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Admin Login</h3>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="adminName" class="block text-gray-700 text-sm font-semibold mb-2">Your Name:</label>
+                    <select id="adminName" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        <option value="">Select your name</option>
+                        <!-- Names will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div>
+                    <label for="adminPassword" class="block text-gray-700 text-sm font-semibold mb-2">Password:</label>
+                    <input type="password" id="adminPassword" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+                <p id="loginError" class="text-red-500 text-xs italic mt-1 hidden text-center">Incorrect password or missing name. Please try again.</p>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" id="cancelLoginBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Replacement Modal -->
+    <div id="replacementModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-button" id="closeReplacementModalBtn">&times;</button>
+            <h3 class="text-2xl font-bold text-center text-gray-800 mb-6 text-center">Record New Replacement</h3>
+            <form id="replacementForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Replacement Type:</label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="replacementType" value="full-shift" class="form-radio text-blue-600" checked>
+                            <span class="ml-2 text-gray-700">Full Shift</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="replacementType" value="partial-shift" class="form-radio text-blue-600">
+                            <span class="ml-2 text-gray-700">Specific Time</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="replacementDate" class="block text-gray-700 text-sm font-semibold mb-2">Date of Replacement:</label>
+                    <input type="date" id="replacementDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+
+                <div id="fullShiftFields">
+                    <label for="replacementShift" class="block text-gray-700 text-sm font-semibold mb-2">Shift Affected:</label>
+                    <select id="replacementShift" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select a shift</option>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="night">Night</option>
+                        <option value="offCall">Off-Call</option>
+                        <option value="weekend">Weekend All Shifts</option>
+                    </select>
+                </div>
+
+                <div id="partialShiftFields" class="hidden">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Time Range (IST):</label>
+                    <div class="flex space-x-4">
+                        <input type="time" id="replacementStartTime" class="shadow-sm appearance-none border rounded-lg w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <span class="text-gray-600 flex items-center">-</span>
+                        <input type="time" id="replacementEndTime" class="shadow-sm appearance-none border rounded-lg w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <p id="timeError" class="text-red-500 text-xs italic mt-1 hidden">End time must be after start time.</p>
+                </div>
+
+                <div>
+                    <label for="originalPerson" class="block text-gray-700 text-sm font-semibold mb-2">Original Person:</label>
+                    <select id="originalPerson" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        <option value="">Select original person</option>
+                    </select>
+                    <p id="originalPersonWarning" class="text-orange-500 text-xs italic mt-1 hidden">Warning: The selected person is not currently on call for this shift.</p>
+                </div>
+                <div>
+                    <label for="replacementPerson" class="block text-gray-700 text-sm font-semibold mb-2">Replacement Person:</label>
+                    <select id="replacementPerson" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        <option value="">Select replacement person</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="changerName" class="block text-gray-700 text-sm font-semibold mb-2">Recorded By (Your Name):</label>
+                    <input type="text" id="changerName" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Jane Doe" required>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" id="cancelReplacementFormBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Record Change
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-button" id="closeNotesModalBtn">&times;</button>
+            <h3 class="text-2xl font-bold text-center text-gray-800 mb-6 text-center">Generate Shift Handover Notes ✨</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="notesDate" class="block text-gray-700 text-sm font-semibold mb-2">Date:</label>
+                    <input type="date" id="notesDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+                <div>
+                    <label for="notesShift" class="block text-gray-700 text-sm font-semibold mb-2">Shift:</label>
+                    <select id="notesShift" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        <option value="">Select a shift</option>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="night">Night</option>
+                    </select>
+                </div>
+                <div class="flex justify-center">
+                    <button id="generateNotesSubmitBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Generate Notes
+                    </button>
+                </div>
+                <div id="notesLoadingIndicator" class="text-center text-gray-500 hidden">
+                    Generating notes...
+                    <div class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full ml-2"></div>
+                </div>
+                <div id="notesOutput" class="notes-output mt-4">
+                    <!-- LLM generated notes will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to external JavaScript file -->
+    <script src="main.js"></script>
+</body>
+</html>
