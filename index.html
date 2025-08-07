@@ -12,8 +12,17 @@
 </head>
 <body class="antialiased">
     <div class="container">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Team On-Call Roster</h1>
-        <p class="text-center text-sm text-gray-600 mb-4">All shift timings are in Indian Standard Time (IST)</p>
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Team On-Call Roster</h1>
+
+        <div class="flex justify-center items-center mb-4 space-x-3">
+            <span class="text-sm font-medium text-gray-700">EST</span>
+            <label for="timezone-toggle" class="inline-flex relative items-center cursor-pointer">
+                <input type="checkbox" id="timezone-toggle" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+            <span class="text-sm font-medium text-gray-700">IST</span>
+        </div>
+        <p id="timezone-info" class="text-center text-sm text-gray-600 mb-4">All shift timings are in Indian Standard Time (IST)</p>
 
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
             <button id="prevWeekBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
@@ -39,9 +48,9 @@
                     <tr>
                         <th class="rounded-tl-lg">Day</th>
                         <th>Date</th>
-                        <th>Morning <br>(6:30 am - 2:30 pm)</th>
-                        <th>Afternoon <br>(2:30 pm - 10:30 pm)</th>
-                        <th>Night <br>(10:30 pm - 6:30 am)</th>
+                        <th id="morning-shift-header">Morning <br>(6:30 am - 2:30 pm)</th>
+                        <th id="afternoon-shift-header">Afternoon <br>(2:30 pm - 10:30 pm)</th>
+                        <th id="night-shift-header">Night <br>(10:30 pm - 6:30 am)</th>
                         <th class="rounded-tr-lg">Off-Call</th>
                     </tr>
                 </thead>
@@ -127,7 +136,7 @@
                 </div>
 
                 <div id="partialShiftFields" class="hidden">
-                    <label class="block text-gray-700 text-sm font-semibold mb-2">Time Range (IST):</label>
+                    <label id="time-range-label" class="block text-gray-700 text-sm font-semibold mb-2">Time Range (IST):</label>
                     <div class="flex space-x-4">
                         <input type="time" id="replacementStartTime" class="shadow-sm appearance-none border rounded-lg w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <span class="text-gray-600 flex items-center">-</span>

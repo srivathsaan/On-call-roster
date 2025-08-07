@@ -1086,6 +1086,57 @@ replacementForm.addEventListener('submit', (event) => {
 
 // Initial display of the current week's roster and replacement cards when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Timezone Toggle Logic ---
+    const timezoneToggle = document.getElementById('timezone-toggle');
+    const timezoneInfo = document.getElementById('timezone-info');
+    const morningShiftHeader = document.getElementById('morning-shift-header');
+    const afternoonShiftHeader = document.getElementById('afternoon-shift-header');
+    const nightShiftHeader = document.getElementById('night-shift-header');
+    const timeRangeLabel = document.getElementById('time-range-label');
+
+    const shiftTimesConfig = {
+        ist: {
+            morning: 'Morning <br>(6:30 am - 2:30 pm)',
+            afternoon: 'Afternoon <br>(2:30 pm - 10:30 pm)',
+            night: 'Night <br>(10:30 pm - 6:30 am)',
+            info: 'All shift timings are in Indian Standard Time (IST)',
+            label: 'Time Range (IST):'
+        },
+        est: {
+            // Note: This is for EST (UTC-5) and does not account for Daylight Saving Time (EDT).
+            // IST is 10.5 hours ahead of EST.
+            // The column headers are updated to reflect the local time of day for each shift.
+            // The first column (IST Morning) corresponds to the EST Night shift.
+            morning: 'Night <br>(8:00 pm - 4:00 am)',
+            // The second column (IST Afternoon) corresponds to the EST Morning shift.
+            afternoon: 'Morning <br>(4:00 am - 12:00 pm)',
+            // The third column (IST Night) corresponds to the EST Afternoon shift.
+            night: 'Afternoon <br>(12:00 pm - 8:00 pm)',
+            info: 'All shift timings are in Eastern Standard Time (EST)',
+            label: 'Time Range (EST):'
+        }
+    };
+
+    function updateTimezoneView(isIST) {
+        const zone = isIST ? 'ist' : 'est';
+        
+        if (timezoneInfo) timezoneInfo.innerHTML = shiftTimesConfig[zone].info;
+        if (morningShiftHeader) morningShiftHeader.innerHTML = shiftTimesConfig[zone].morning;
+        if (afternoonShiftHeader) afternoonShiftHeader.innerHTML = shiftTimesConfig[zone].afternoon;
+        if (nightShiftHeader) nightShiftHeader.innerHTML = shiftTimesConfig[zone].night;
+        if (timeRangeLabel) timeRangeLabel.innerHTML = shiftTimesConfig[zone].label;
+    }
+
+    if (timezoneToggle) {
+        // Set initial view based on the default checked state
+        updateTimezoneView(timezoneToggle.checked);
+
+        // Add listener for changes
+        timezoneToggle.addEventListener('change', (event) => {
+            updateTimezoneView(event.target.checked);
+        });
+    }
+
     updateRosterDisplay();
     toggleReplacementFields();
     recordReplacementBtn.disabled = true;
